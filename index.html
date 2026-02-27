@@ -1,191 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<title>Image Compression Comparison</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #111; color: #eee; padding: 20px; }
-  h1 { margin-bottom: 8px; }
-  h2 { margin-top: 40px; margin-bottom: 8px; }
-  .subtitle { color: #999; margin-bottom: 20px; }
+  <meta charset="utf-8">
+  <title>Image Compression Comparison</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* Summary table */
-  .summary { border-collapse: collapse; margin-bottom: 30px; }
-  .summary th, .summary td { padding: 8px 16px; text-align: right; border: 1px solid #444; }
-  .summary th { background: #222; text-align: left; }
-  .summary .savings { color: #4caf50; }
-  .summary .section-header td { background: #1a1a1a; font-weight: bold; text-align: left; color: #ccc; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #111;
+      color: #eee;
+      padding: 20px;
+    }
 
-  /* Image grid */
-  .image-row { margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 20px; }
-  .image-row h3 { margin-bottom: 4px; font-size: 14px; color: #aaa; }
-  .image-row .original-path { font-size: 12px; color: #666; margin-bottom: 10px; }
-  .variants { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .variants-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .variant { text-align: center; }
-  .variant img, .variant video { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; border: 1px solid #333; background: #1a1a1a; cursor: pointer; }
-  .variant .label { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-  .variant .size { font-size: 12px; color: #999; }
-  .variant .savings { font-size: 11px; color: #4caf50; }
+    h1 {
+      margin-bottom: 8px;
+    }
 
-  /* Filters */
-  .controls { margin-bottom: 20px; display: flex; gap: 12px; align-items: center; }
-  .controls select { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; }
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 8px;
+    }
 
-  /* Divider */
-  .section-divider { border-top: 2px solid #555; margin-top: 50px; padding-top: 20px; }
-</style>
+    .subtitle {
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    /* Summary table */
+    .summary {
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    .summary th,
+    .summary td {
+      padding: 8px 16px;
+      text-align: right;
+      border: 1px solid #444;
+    }
+
+    .summary th {
+      background: #222;
+      text-align: left;
+    }
+
+    .summary .savings {
+      color: #4caf50;
+    }
+
+    .summary .section-header td {
+      background: #1a1a1a;
+      font-weight: bold;
+      text-align: left;
+      color: #ccc;
+    }
+
+    /* Image grid */
+    .image-row {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 20px;
+    }
+
+    .image-row h3 {
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .image-row .original-path {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .variants {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .variants-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .variant {
+      text-align: center;
+    }
+
+    .variant img,
+    .variant video {
+      max-width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: contain;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .variant .label {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .variant .size {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .variant .savings {
+      font-size: 11px;
+      color: #4caf50;
+    }
+
+    /* Filters */
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .controls select {
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+
+    /* Divider */
+    .section-divider {
+      border-top: 2px solid #555;
+      margin-top: 50px;
+      padding-top: 20px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Image Compression Comparison</h1>
-<p class="subtitle">earth.gov images over 1MB — compression testing for S3 re-upload</p>
+  <h1>Image Compression Comparison</h1>
+  <p class="subtitle">earth.gov images over 1MB — compression testing for S3 re-upload</p>
 
-<!-- ==================== TOTAL SUMMARY ==================== -->
+  <!-- ==================== TOTAL SUMMARY ==================== -->
 
-<table class="summary" id="total-summary">
-  <thead>
-    <tr><th>Category</th><th>Count</th><th>Original</th><th>Compressed</th><th>Savings</th></tr>
-  </thead>
-  <tbody id="total-summary-body"></tbody>
-</table>
+  <table class="summary" id="total-summary">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Count</th>
+        <th>Original</th>
+        <th>Compressed</th>
+        <th>Savings</th>
+      </tr>
+    </thead>
+    <tbody id="total-summary-body"></tbody>
+  </table>
 
-<!-- ==================== ANIMATED GIFs → WebM ==================== -->
+  <!-- ==================== ANIMATED GIFs → WebM ==================== -->
 
-<h2>Animated GIFs → WebM (VP9)</h2>
-<p class="subtitle">ffmpeg VP9 CRF 30 — animated WebP was tested but made files 2x larger, so WebM is the clear winner</p>
+  <h2>Animated GIFs → WebM (VP9)</h2>
+  <p class="subtitle">ffmpeg VP9 CRF 30 — animated WebP was also tested but made files 2x larger, so WebM is the clear
+    winner</p>
 
-<table class="summary" id="gif-summary-table">
-  <thead>
-    <tr><th>Variant</th><th>Total Size</th><th>Savings vs Original</th></tr>
-  </thead>
-  <tbody id="gif-summary-body"></tbody>
-</table>
+  <table class="summary" id="gif-summary-table">
+    <thead>
+      <tr>
+        <th>Variant</th>
+        <th>Total Size</th>
+        <th>Savings vs Original</th>
+      </tr>
+    </thead>
+    <tbody id="gif-summary-body"></tbody>
+  </table>
 
-<div id="gif-images"></div>
+  <div id="gif-images"></div>
 
-<!-- ==================== STATIC IMAGES (JPG/PNG → WebP) ==================== -->
+  <!-- ==================== STATIC IMAGES (JPG/PNG → WebP) ==================== -->
 
-<div class="section-divider">
-<h2>Static Images: JPG/PNG → WebP</h2>
-<p class="subtitle">cwebp at q60 / q70 / q80 — click any image to open full size</p>
+  <div class="section-divider">
+    <h2>Static Images: JPG/PNG → WebP</h2>
+    <p class="subtitle">cwebp at q60 / q70 / q80 — click any image to open full size</p>
 
-<div class="controls">
-  <label>Filter: <select id="filter">
-    <option value="all">All images</option>
-    <option value="jpg">JPG only</option>
-    <option value="png">PNG only</option>
-  </select></label>
-  <label>Sort: <select id="sort">
-    <option value="size-desc">By size (largest first)</option>
-    <option value="name">By name</option>
-    <option value="savings">By savings % (best first)</option>
-  </select></label>
-</div>
+    <div class="controls">
+      <label>Filter: <select id="filter">
+          <option value="all">All images</option>
+          <option value="jpg">JPG only</option>
+          <option value="png">PNG only</option>
+        </select></label>
+      <label>Sort: <select id="sort">
+          <option value="size-desc">By size (largest first)</option>
+          <option value="name">By name</option>
+          <option value="savings">By savings % (best first)</option>
+        </select></label>
+    </div>
 
-<table class="summary" id="summary-table">
-  <thead>
-    <tr><th>Variant</th><th>Total Size</th><th>Savings vs Original</th></tr>
-  </thead>
-  <tbody id="summary-body"></tbody>
-</table>
+    <table class="summary" id="summary-table">
+      <thead>
+        <tr>
+          <th>Variant</th>
+          <th>Total Size</th>
+          <th>Savings vs Original</th>
+        </tr>
+      </thead>
+      <tbody id="summary-body"></tbody>
+    </table>
 
-<div id="images"></div>
-</div>
+    <div id="images"></div>
+  </div>
 
-<script>
-// Static image data (JPG/PNG → WebP)
-const IMAGE_DATA = [
-{"stem":"portals--earth-information-center","ext":"png","originalPath":"portals--earth-information-center","originalFile":"originals/portals--earth-information-center.png","originalSize":1337368,"q60File":"webp-q60/portals--earth-information-center.webp","q60Size":197074,"q70File":"webp-q70/portals--earth-information-center.webp","q70Size":256352,"q80File":"webp-q80/portals--earth-information-center.webp","q80Size":401982},
-{"stem":"story--air-quality-and-covid-19--discovery-cover","ext":"jpg","originalPath":"story--air-quality-and-covid-19--discovery-cover","originalFile":"originals/story--air-quality-and-covid-19--discovery-cover.jpg","originalSize":1214952,"q60File":"webp-q60/story--air-quality-and-covid-19--discovery-cover.webp","q60Size":26368,"q70File":"webp-q70/story--air-quality-and-covid-19--discovery-cover.webp","q70Size":30638,"q80File":"webp-q80/story--air-quality-and-covid-19--discovery-cover.webp","q80Size":45016},
-{"stem":"themes--agriculture--agriculture-banner","ext":"png","originalPath":"themes--agriculture--agriculture-banner","originalFile":"originals/themes--agriculture--agriculture-banner.png","originalSize":1331470,"q60File":"webp-q60/themes--agriculture--agriculture-banner.webp","q60Size":98612,"q70File":"webp-q70/themes--agriculture--agriculture-banner.webp","q70Size":114396,"q80File":"webp-q80/themes--agriculture--agriculture-banner.webp","q80Size":155516},
-{"stem":"themes--disasters--card","ext":"png","originalPath":"themes--disasters--card","originalFile":"originals/themes--disasters--card.png","originalSize":1087209,"q60File":"webp-q60/themes--disasters--card.webp","q60Size":801728,"q70File":"webp-q70/themes--disasters--card.webp","q70Size":906962,"q80File":"webp-q80/themes--disasters--card.webp","q80Size":1120858},
-{"stem":"themes--disasters--disasters-banner","ext":"png","originalPath":"themes--disasters--disasters-banner","originalFile":"originals/themes--disasters--disasters-banner.png","originalSize":1052233,"q60File":"webp-q60/themes--disasters--disasters-banner.webp","q60Size":71270,"q70File":"webp-q70/themes--disasters--disasters-banner.webp","q70Size":80176,"q80File":"webp-q80/themes--disasters--disasters-banner.webp","q80Size":104074},
-{"stem":"themes--energy--card","ext":"png","originalPath":"themes--energy--card","originalFile":"originals/themes--energy--card.png","originalSize":1430244,"q60File":"webp-q60/themes--energy--card.webp","q60Size":258330,"q70File":"webp-q70/themes--energy--card.webp","q70Size":298324,"q80File":"webp-q80/themes--energy--card.webp","q80Size":396858},
-{"stem":"themes--energy--energy-banner","ext":"png","originalPath":"themes--energy--energy-banner","originalFile":"originals/themes--energy--energy-banner.png","originalSize":1324374,"q60File":"webp-q60/themes--energy--energy-banner.webp","q60Size":152308,"q70File":"webp-q70/themes--energy--energy-banner.webp","q70Size":176572,"q80File":"webp-q80/themes--energy--energy-banner.webp","q80Size":238398},
-{"stem":"themes--water-resources--card","ext":"png","originalPath":"themes--water-resources--card","originalFile":"originals/themes--water-resources--card.png","originalSize":1160649,"q60File":"webp-q60/themes--water-resources--card.webp","q60Size":886078,"q70File":"webp-q70/themes--water-resources--card.webp","q70Size":994732,"q80File":"webp-q80/themes--water-resources--card.webp","q80Size":1255584},
-{"stem":"themes--water-resources--water-resources-banner","ext":"png","originalPath":"themes--water-resources--water-resources-banner","originalFile":"originals/themes--water-resources--water-resources-banner.png","originalSize":1135160,"q60File":"webp-q60/themes--water-resources--water-resources-banner.webp","q60Size":112004,"q70File":"webp-q70/themes--water-resources--water-resources-banner.webp","q70Size":130088,"q80File":"webp-q80/themes--water-resources--water-resources-banner.webp","q80Size":186712},
-{"stem":"visit--hyperwall--stakeholder-shorts","ext":"png","originalPath":"visit--hyperwall--stakeholder-shorts","originalFile":"originals/visit--hyperwall--stakeholder-shorts.png","originalSize":1208720,"q60File":"webp-q60/visit--hyperwall--stakeholder-shorts.webp","q60Size":139282,"q70File":"webp-q70/visit--hyperwall--stakeholder-shorts.webp","q70Size":156464,"q80File":"webp-q80/visit--hyperwall--stakeholder-shorts.webp","q80Size":203452},
-{"stem":"visit--immersive-experience--immersive-experience","ext":"jpg","originalPath":"visit--immersive-experience--immersive-experience","originalFile":"originals/visit--immersive-experience--immersive-experience.jpg","originalSize":7087717,"q60File":"webp-q60/visit--immersive-experience--immersive-experience.webp","q60Size":198474,"q70File":"webp-q70/visit--immersive-experience--immersive-experience.webp","q70Size":229370,"q80File":"webp-q80/visit--immersive-experience--immersive-experience.webp","q80Size":318558},
-{"stem":"visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1","ext":"png","originalPath":"visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1","originalFile":"originals/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.png","originalSize":1533094,"q60File":"webp-q60/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp","q60Size":109866,"q70File":"webp-q70/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp","q70Size":125160,"q80File":"webp-q80/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp","q80Size":169270},
-{"stem":"visit--kennedy-space-center--kennedy-space-center-hero","ext":"png","originalPath":"visit--kennedy-space-center--kennedy-space-center-hero","originalFile":"originals/visit--kennedy-space-center--kennedy-space-center-hero.png","originalSize":1148346,"q60File":"webp-q60/visit--kennedy-space-center--kennedy-space-center-hero.webp","q60Size":151636,"q70File":"webp-q70/visit--kennedy-space-center--kennedy-space-center-hero.webp","q70Size":172168,"q80File":"webp-q80/visit--kennedy-space-center--kennedy-space-center-hero.webp","q80Size":230804},
-{"stem":"visit--nasa-hq--nasa-hq-features-earth-pulse-2","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-earth-pulse-2","originalFile":"originals/visit--nasa-hq--nasa-hq-features-earth-pulse-2.jpg","originalSize":1366807,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp","q60Size":103070,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp","q70Size":130858,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp","q80Size":209964},
-{"stem":"visit--nasa-hq--nasa-hq-features-hyperwall-1","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-hyperwall-1","originalFile":"originals/visit--nasa-hq--nasa-hq-features-hyperwall-1.jpg","originalSize":1524032,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp","q60Size":113018,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp","q70Size":135240,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp","q80Size":200036},
-{"stem":"visit--nasa-hq--nasa-hq-features-hyperwall-2","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-hyperwall-2","originalFile":"originals/visit--nasa-hq--nasa-hq-features-hyperwall-2.jpg","originalSize":1820357,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp","q60Size":229702,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp","q70Size":263658,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp","q80Size":351612},
-{"stem":"visit--nasa-hq--nasa-hq-features-hyperwall-3","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-hyperwall-3","originalFile":"originals/visit--nasa-hq--nasa-hq-features-hyperwall-3.jpg","originalSize":2265998,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp","q60Size":342380,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp","q70Size":392106,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp","q80Size":511430},
-{"stem":"visit--nasa-hq--nasa-hq-features-planet-pen-2","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-planet-pen-2","originalFile":"originals/visit--nasa-hq--nasa-hq-features-planet-pen-2.jpg","originalSize":1683535,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp","q60Size":271474,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp","q70Size":300592,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp","q80Size":380898},
-{"stem":"visit--nasa-hq--nasa-hq-features-space-for-earth-1","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-space-for-earth-1","originalFile":"originals/visit--nasa-hq--nasa-hq-features-space-for-earth-1.jpg","originalSize":1446838,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp","q60Size":177148,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp","q70Size":211838,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp","q80Size":289692},
-{"stem":"visit--nasa-hq--nasa-hq-features-space-for-earth-2","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-space-for-earth-2","originalFile":"originals/visit--nasa-hq--nasa-hq-features-space-for-earth-2.jpg","originalSize":1339453,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp","q60Size":132208,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp","q70Size":156074,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp","q80Size":218772},
-{"stem":"visit--nasa-hq--nasa-hq-features-space-for-earth-3","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-space-for-earth-3","originalFile":"originals/visit--nasa-hq--nasa-hq-features-space-for-earth-3.jpg","originalSize":1417416,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp","q60Size":169694,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp","q70Size":190736,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp","q80Size":241256},
-{"stem":"visit--nasa-hq--nasa-hq-features-space-for-earth-4","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-features-space-for-earth-4","originalFile":"originals/visit--nasa-hq--nasa-hq-features-space-for-earth-4.jpg","originalSize":1832869,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp","q60Size":203522,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp","q70Size":259752,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp","q80Size":374338},
-{"stem":"visit--nasa-hq--nasa-hq-gallery-1","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-1","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-1.jpg","originalSize":1694652,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-1.webp","q60Size":269644,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-1.webp","q70Size":297580,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-1.webp","q80Size":386056},
-{"stem":"visit--nasa-hq--nasa-hq-gallery-2","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-2","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-2.jpg","originalSize":1494012,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-2.webp","q60Size":204076,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-2.webp","q70Size":229436,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-2.webp","q80Size":297082},
-{"stem":"visit--nasa-hq--nasa-hq-gallery-3","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-3","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-3.jpg","originalSize":1916663,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-3.webp","q60Size":351826,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-3.webp","q70Size":391106,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-3.webp","q80Size":495134},
-{"stem":"visit--nasa-hq--nasa-hq-gallery-4","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-4","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-4.jpg","originalSize":1656851,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-4.webp","q60Size":238536,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-4.webp","q70Size":269412,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-4.webp","q80Size":358554},
-{"stem":"visit--nasa-hq--nasa-hq-gallery-5","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-5","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-5.jpg","originalSize":1899067,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-5.webp","q60Size":323150,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-5.webp","q70Size":363460,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-5.webp","q80Size":462992}
-];
+  <script>
+    // Static image data (JPG/PNG → WebP)
+    const IMAGE_DATA = [
+      { "stem": "portals--earth-information-center", "ext": "png", "originalPath": "portals--earth-information-center", "originalFile": "originals/portals--earth-information-center.png", "originalSize": 1337368, "q60File": "webp-q60/portals--earth-information-center.webp", "q60Size": 197074, "q70File": "webp-q70/portals--earth-information-center.webp", "q70Size": 256352, "q80File": "webp-q80/portals--earth-information-center.webp", "q80Size": 401982 },
+      { "stem": "story--air-quality-and-covid-19--discovery-cover", "ext": "jpg", "originalPath": "story--air-quality-and-covid-19--discovery-cover", "originalFile": "originals/story--air-quality-and-covid-19--discovery-cover.jpg", "originalSize": 1214952, "q60File": "webp-q60/story--air-quality-and-covid-19--discovery-cover.webp", "q60Size": 26368, "q70File": "webp-q70/story--air-quality-and-covid-19--discovery-cover.webp", "q70Size": 30638, "q80File": "webp-q80/story--air-quality-and-covid-19--discovery-cover.webp", "q80Size": 45016 },
+      { "stem": "themes--agriculture--agriculture-banner", "ext": "png", "originalPath": "themes--agriculture--agriculture-banner", "originalFile": "originals/themes--agriculture--agriculture-banner.png", "originalSize": 1331470, "q60File": "webp-q60/themes--agriculture--agriculture-banner.webp", "q60Size": 98612, "q70File": "webp-q70/themes--agriculture--agriculture-banner.webp", "q70Size": 114396, "q80File": "webp-q80/themes--agriculture--agriculture-banner.webp", "q80Size": 155516 },
+      { "stem": "themes--disasters--card", "ext": "png", "originalPath": "themes--disasters--card", "originalFile": "originals/themes--disasters--card.png", "originalSize": 1087209, "q60File": "webp-q60/themes--disasters--card.webp", "q60Size": 801728, "q70File": "webp-q70/themes--disasters--card.webp", "q70Size": 906962, "q80File": "webp-q80/themes--disasters--card.webp", "q80Size": 1120858 },
+      { "stem": "themes--disasters--disasters-banner", "ext": "png", "originalPath": "themes--disasters--disasters-banner", "originalFile": "originals/themes--disasters--disasters-banner.png", "originalSize": 1052233, "q60File": "webp-q60/themes--disasters--disasters-banner.webp", "q60Size": 71270, "q70File": "webp-q70/themes--disasters--disasters-banner.webp", "q70Size": 80176, "q80File": "webp-q80/themes--disasters--disasters-banner.webp", "q80Size": 104074 },
+      { "stem": "themes--energy--card", "ext": "png", "originalPath": "themes--energy--card", "originalFile": "originals/themes--energy--card.png", "originalSize": 1430244, "q60File": "webp-q60/themes--energy--card.webp", "q60Size": 258330, "q70File": "webp-q70/themes--energy--card.webp", "q70Size": 298324, "q80File": "webp-q80/themes--energy--card.webp", "q80Size": 396858 },
+      { "stem": "themes--energy--energy-banner", "ext": "png", "originalPath": "themes--energy--energy-banner", "originalFile": "originals/themes--energy--energy-banner.png", "originalSize": 1324374, "q60File": "webp-q60/themes--energy--energy-banner.webp", "q60Size": 152308, "q70File": "webp-q70/themes--energy--energy-banner.webp", "q70Size": 176572, "q80File": "webp-q80/themes--energy--energy-banner.webp", "q80Size": 238398 },
+      { "stem": "themes--water-resources--card", "ext": "png", "originalPath": "themes--water-resources--card", "originalFile": "originals/themes--water-resources--card.png", "originalSize": 1160649, "q60File": "webp-q60/themes--water-resources--card.webp", "q60Size": 886078, "q70File": "webp-q70/themes--water-resources--card.webp", "q70Size": 994732, "q80File": "webp-q80/themes--water-resources--card.webp", "q80Size": 1255584 },
+      { "stem": "themes--water-resources--water-resources-banner", "ext": "png", "originalPath": "themes--water-resources--water-resources-banner", "originalFile": "originals/themes--water-resources--water-resources-banner.png", "originalSize": 1135160, "q60File": "webp-q60/themes--water-resources--water-resources-banner.webp", "q60Size": 112004, "q70File": "webp-q70/themes--water-resources--water-resources-banner.webp", "q70Size": 130088, "q80File": "webp-q80/themes--water-resources--water-resources-banner.webp", "q80Size": 186712 },
+      { "stem": "visit--hyperwall--stakeholder-shorts", "ext": "png", "originalPath": "visit--hyperwall--stakeholder-shorts", "originalFile": "originals/visit--hyperwall--stakeholder-shorts.png", "originalSize": 1208720, "q60File": "webp-q60/visit--hyperwall--stakeholder-shorts.webp", "q60Size": 139282, "q70File": "webp-q70/visit--hyperwall--stakeholder-shorts.webp", "q70Size": 156464, "q80File": "webp-q80/visit--hyperwall--stakeholder-shorts.webp", "q80Size": 203452 },
+      { "stem": "visit--immersive-experience--immersive-experience", "ext": "jpg", "originalPath": "visit--immersive-experience--immersive-experience", "originalFile": "originals/visit--immersive-experience--immersive-experience.jpg", "originalSize": 7087717, "q60File": "webp-q60/visit--immersive-experience--immersive-experience.webp", "q60Size": 198474, "q70File": "webp-q70/visit--immersive-experience--immersive-experience.webp", "q70Size": 229370, "q80File": "webp-q80/visit--immersive-experience--immersive-experience.webp", "q80Size": 318558 },
+      { "stem": "visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1", "ext": "png", "originalPath": "visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1", "originalFile": "originals/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.png", "originalSize": 1533094, "q60File": "webp-q60/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp", "q60Size": 109866, "q70File": "webp-q70/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp", "q70Size": 125160, "q80File": "webp-q80/visit--kennedy-space-center--kennedy-space-center-features-earth-pulse-1.webp", "q80Size": 169270 },
+      { "stem": "visit--kennedy-space-center--kennedy-space-center-hero", "ext": "png", "originalPath": "visit--kennedy-space-center--kennedy-space-center-hero", "originalFile": "originals/visit--kennedy-space-center--kennedy-space-center-hero.png", "originalSize": 1148346, "q60File": "webp-q60/visit--kennedy-space-center--kennedy-space-center-hero.webp", "q60Size": 151636, "q70File": "webp-q70/visit--kennedy-space-center--kennedy-space-center-hero.webp", "q70Size": 172168, "q80File": "webp-q80/visit--kennedy-space-center--kennedy-space-center-hero.webp", "q80Size": 230804 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-earth-pulse-2", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-earth-pulse-2", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-earth-pulse-2.jpg", "originalSize": 1366807, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp", "q60Size": 103070, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp", "q70Size": 130858, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-earth-pulse-2.webp", "q80Size": 209964 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-hyperwall-1", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-hyperwall-1", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-hyperwall-1.jpg", "originalSize": 1524032, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp", "q60Size": 113018, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp", "q70Size": 135240, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-1.webp", "q80Size": 200036 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-hyperwall-2", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-hyperwall-2", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-hyperwall-2.jpg", "originalSize": 1820357, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp", "q60Size": 229702, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp", "q70Size": 263658, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-2.webp", "q80Size": 351612 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-hyperwall-3", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-hyperwall-3", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-hyperwall-3.jpg", "originalSize": 2265998, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp", "q60Size": 342380, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp", "q70Size": 392106, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-hyperwall-3.webp", "q80Size": 511430 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-planet-pen-2", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-planet-pen-2", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-planet-pen-2.jpg", "originalSize": 1683535, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp", "q60Size": 271474, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp", "q70Size": 300592, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-planet-pen-2.webp", "q80Size": 380898 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-space-for-earth-1", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-space-for-earth-1", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-space-for-earth-1.jpg", "originalSize": 1446838, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp", "q60Size": 177148, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp", "q70Size": 211838, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-1.webp", "q80Size": 289692 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-space-for-earth-2", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-space-for-earth-2", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-space-for-earth-2.jpg", "originalSize": 1339453, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp", "q60Size": 132208, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp", "q70Size": 156074, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-2.webp", "q80Size": 218772 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-space-for-earth-3", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-space-for-earth-3", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-space-for-earth-3.jpg", "originalSize": 1417416, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp", "q60Size": 169694, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp", "q70Size": 190736, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-3.webp", "q80Size": 241256 },
+      { "stem": "visit--nasa-hq--nasa-hq-features-space-for-earth-4", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-features-space-for-earth-4", "originalFile": "originals/visit--nasa-hq--nasa-hq-features-space-for-earth-4.jpg", "originalSize": 1832869, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp", "q60Size": 203522, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp", "q70Size": 259752, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-features-space-for-earth-4.webp", "q80Size": 374338 },
+      { "stem": "visit--nasa-hq--nasa-hq-gallery-1", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-gallery-1", "originalFile": "originals/visit--nasa-hq--nasa-hq-gallery-1.jpg", "originalSize": 1694652, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-gallery-1.webp", "q60Size": 269644, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-gallery-1.webp", "q70Size": 297580, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-gallery-1.webp", "q80Size": 386056 },
+      { "stem": "visit--nasa-hq--nasa-hq-gallery-2", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-gallery-2", "originalFile": "originals/visit--nasa-hq--nasa-hq-gallery-2.jpg", "originalSize": 1494012, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-gallery-2.webp", "q60Size": 204076, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-gallery-2.webp", "q70Size": 229436, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-gallery-2.webp", "q80Size": 297082 },
+      { "stem": "visit--nasa-hq--nasa-hq-gallery-3", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-gallery-3", "originalFile": "originals/visit--nasa-hq--nasa-hq-gallery-3.jpg", "originalSize": 1916663, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-gallery-3.webp", "q60Size": 351826, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-gallery-3.webp", "q70Size": 391106, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-gallery-3.webp", "q80Size": 495134 },
+      { "stem": "visit--nasa-hq--nasa-hq-gallery-4", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-gallery-4", "originalFile": "originals/visit--nasa-hq--nasa-hq-gallery-4.jpg", "originalSize": 1656851, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-gallery-4.webp", "q60Size": 238536, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-gallery-4.webp", "q70Size": 269412, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-gallery-4.webp", "q80Size": 358554 },
+      { "stem": "visit--nasa-hq--nasa-hq-gallery-5", "ext": "jpg", "originalPath": "visit--nasa-hq--nasa-hq-gallery-5", "originalFile": "originals/visit--nasa-hq--nasa-hq-gallery-5.jpg", "originalSize": 1899067, "q60File": "webp-q60/visit--nasa-hq--nasa-hq-gallery-5.webp", "q60Size": 323150, "q70File": "webp-q70/visit--nasa-hq--nasa-hq-gallery-5.webp", "q70Size": 363460, "q80File": "webp-q80/visit--nasa-hq--nasa-hq-gallery-5.webp", "q80Size": 462992 }
+    ];
 
-// Animated GIF data (GIF → WebM)
-const GIF_DATA = [
-{"stem":"visit--frost-museum--EIC Immersive at BMOS - GIF 7","originalFile":"originals/visit--frost-museum--EIC Immersive at BMOS - GIF 7.gif","originalSize":5875270,"webmFile":"webm/visit--frost-museum--EIC Immersive at BMOS - GIF 7.webm","webmSize":772854,"frames":132,"duration":"6.6s"},
-{"stem":"visit--immersive-experience--untethered-1","originalFile":"originals/visit--immersive-experience--untethered-1.gif","originalSize":9178076,"webmFile":"webm/visit--immersive-experience--untethered-1.webm","webmSize":1671219,"frames":117,"duration":"5.9s"},
-{"stem":"visit--immersive-experience--untethered-2","originalFile":"originals/visit--immersive-experience--untethered-2.gif","originalSize":8482142,"webmFile":"webm/visit--immersive-experience--untethered-2.webm","webmSize":1123982,"frames":144,"duration":"7.2s"},
-{"stem":"visit--immersive-experience--untethered-3","originalFile":"originals/visit--immersive-experience--untethered-3.gif","originalSize":5438228,"webmFile":"webm/visit--immersive-experience--untethered-3.webm","webmSize":726497,"frames":91,"duration":"4.6s"},
-{"stem":"visit--immersive-experience--untethered-4","originalFile":"originals/visit--immersive-experience--untethered-4.gif","originalSize":5460499,"webmFile":"webm/visit--immersive-experience--untethered-4.webm","webmSize":856852,"frames":110,"duration":"5.5s"}
-];
+    // Animated GIF data (GIF → WebM)
+    const GIF_DATA = [
+      { "stem": "visit--frost-museum--EIC Immersive at BMOS - GIF 7", "originalFile": "originals/visit--frost-museum--EIC Immersive at BMOS - GIF 7.gif", "originalSize": 5875270, "webmFile": "webm/visit--frost-museum--EIC Immersive at BMOS - GIF 7.webm", "webmSize": 772854, "frames": 132, "duration": "6.6s" },
+      { "stem": "visit--immersive-experience--untethered-1", "originalFile": "originals/visit--immersive-experience--untethered-1.gif", "originalSize": 9178076, "webmFile": "webm/visit--immersive-experience--untethered-1.webm", "webmSize": 1671219, "frames": 117, "duration": "5.9s" },
+      { "stem": "visit--immersive-experience--untethered-2", "originalFile": "originals/visit--immersive-experience--untethered-2.gif", "originalSize": 8482142, "webmFile": "webm/visit--immersive-experience--untethered-2.webm", "webmSize": 1123982, "frames": 144, "duration": "7.2s" },
+      { "stem": "visit--immersive-experience--untethered-3", "originalFile": "originals/visit--immersive-experience--untethered-3.gif", "originalSize": 5438228, "webmFile": "webm/visit--immersive-experience--untethered-3.webm", "webmSize": 726497, "frames": 91, "duration": "4.6s" },
+      { "stem": "visit--immersive-experience--untethered-4", "originalFile": "originals/visit--immersive-experience--untethered-4.gif", "originalSize": 5460499, "webmFile": "webm/visit--immersive-experience--untethered-4.webm", "webmSize": 856852, "frames": 110, "duration": "5.5s" }
+    ];
 
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
 
-function pctSavings(orig, compressed) {
-  return ((1 - compressed / orig) * 100).toFixed(1);
-}
+    function pctSavings(orig, compressed) {
+      return ((1 - compressed / orig) * 100).toFixed(1);
+    }
 
-// ==================== Total summary ====================
+    // ==================== Total summary ====================
 
-function renderTotalSummary() {
-  const tbody = document.getElementById('total-summary-body');
+    function renderTotalSummary() {
+      const tbody = document.getElementById('total-summary-body');
 
-  let gifOrig = 0, gifCompressed = 0;
-  GIF_DATA.forEach(d => { gifOrig += d.originalSize; gifCompressed += d.webmSize; });
+      let gifOrig = 0, gifCompressed = 0;
+      GIF_DATA.forEach(d => { gifOrig += d.originalSize; gifCompressed += d.webmSize; });
 
-  let imgOrig = 0, imgQ60 = 0;
-  IMAGE_DATA.forEach(d => { imgOrig += d.originalSize; imgQ60 += d.q60Size; });
+      let imgOrig = 0, imgQ70 = 0;
+      IMAGE_DATA.forEach(d => { imgOrig += d.originalSize; imgQ70 += d.q70Size; });
 
-  const totalOrig = gifOrig + imgOrig;
-  const totalCompressed = gifCompressed + imgQ60;
+      const totalOrig = gifOrig + imgOrig;
+      const totalCompressed = gifCompressed + imgQ70;
 
-  tbody.innerHTML = `
+      tbody.innerHTML = `
     <tr><td>Animated GIFs → WebM</td><td>${GIF_DATA.length}</td><td>${formatBytes(gifOrig)}</td><td>${formatBytes(gifCompressed)}</td><td class="savings">${pctSavings(gifOrig, gifCompressed)}%</td></tr>
-    <tr><td>Static Images → WebP q60</td><td>${IMAGE_DATA.length}</td><td>${formatBytes(imgOrig)}</td><td>${formatBytes(imgQ60)}</td><td class="savings">${pctSavings(imgOrig, imgQ60)}%</td></tr>
+    <tr><td>Static Images → WebP q70</td><td>${IMAGE_DATA.length}</td><td>${formatBytes(imgOrig)}</td><td>${formatBytes(imgQ70)}</td><td class="savings">${pctSavings(imgOrig, imgQ70)}%</td></tr>
     <tr style="font-weight:bold; border-top: 2px solid #666;"><td>Total</td><td>${GIF_DATA.length + IMAGE_DATA.length}</td><td>${formatBytes(totalOrig)}</td><td>${formatBytes(totalCompressed)}</td><td class="savings">${pctSavings(totalOrig, totalCompressed)}%</td></tr>
   `;
-}
+    }
 
-renderTotalSummary();
+    renderTotalSummary();
 
-// ==================== Animated GIFs ====================
+    // ==================== Animated GIFs ====================
 
-function renderGifSection() {
-  const tbody = document.getElementById('gif-summary-body');
-  let totalOrig = 0, totalWebm = 0;
-  GIF_DATA.forEach(d => { totalOrig += d.originalSize; totalWebm += d.webmSize; });
+    function renderGifSection() {
+      const tbody = document.getElementById('gif-summary-body');
+      let totalOrig = 0, totalWebm = 0;
+      GIF_DATA.forEach(d => { totalOrig += d.originalSize; totalWebm += d.webmSize; });
 
-  tbody.innerHTML = [
-    ['Original GIF', totalOrig, null],
-    ['WebM (VP9)', totalWebm, pctSavings(totalOrig, totalWebm)],
-  ].map(([name, size, s]) =>
-    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
-  ).join('');
+      tbody.innerHTML = [
+        ['Original GIF', totalOrig, null],
+        ['WebM (VP9)', totalWebm, pctSavings(totalOrig, totalWebm)],
+      ].map(([name, size, s]) =>
+        `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
+      ).join('');
 
-  const container = document.getElementById('gif-images');
-  container.innerHTML = GIF_DATA.map(d => {
-    const origPath = d.stem.replace(/--/g, '/');
-    return `
+      const container = document.getElementById('gif-images');
+      container.innerHTML = GIF_DATA.map(d => {
+        const origPath = d.stem.replace(/--/g, '/');
+        return `
     <div class="image-row">
       <h3>${d.stem}</h3>
       <div class="original-path">public/images/${origPath} (${d.frames} frames, ${d.duration})</div>
@@ -203,40 +329,40 @@ function renderGifSection() {
         </div>
       </div>
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-renderGifSection();
+    renderGifSection();
 
-// ==================== Static images ====================
+    // ==================== Static images ====================
 
-function renderSummary(data) {
-  const tbody = document.getElementById('summary-body');
-  const totals = { original: 0, q60: 0, q70: 0, q80: 0 };
-  data.forEach(d => {
-    totals.original += d.originalSize;
-    totals.q60 += d.q60Size;
-    totals.q70 += d.q70Size;
-    totals.q80 += d.q80Size;
-  });
+    function renderSummary(data) {
+      const tbody = document.getElementById('summary-body');
+      const totals = { original: 0, q60: 0, q70: 0, q80: 0 };
+      data.forEach(d => {
+        totals.original += d.originalSize;
+        totals.q60 += d.q60Size;
+        totals.q70 += d.q70Size;
+        totals.q80 += d.q80Size;
+      });
 
-  const rows = [
-    ['Original', totals.original, null],
-    ['WebP q60', totals.q60, pctSavings(totals.original, totals.q60)],
-    ['WebP q70', totals.q70, pctSavings(totals.original, totals.q70)],
-    ['WebP q80', totals.q80, pctSavings(totals.original, totals.q80)],
-  ];
+      const rows = [
+        ['Original', totals.original, null],
+        ['WebP q60', totals.q60, pctSavings(totals.original, totals.q60)],
+        ['WebP q70', totals.q70, pctSavings(totals.original, totals.q70)],
+        ['WebP q80', totals.q80, pctSavings(totals.original, totals.q80)],
+      ];
 
-  tbody.innerHTML = rows.map(([name, size, s]) =>
-    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
-  ).join('');
-}
+      tbody.innerHTML = rows.map(([name, size, s]) =>
+        `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
+      ).join('');
+    }
 
-function renderImages(data) {
-  const container = document.getElementById('images');
-  container.innerHTML = data.map(d => {
-    const origPath = d.originalPath.replace(/--/g, '/');
-    return `
+    function renderImages(data) {
+      const container = document.getElementById('images');
+      container.innerHTML = data.map(d => {
+        const origPath = d.originalPath.replace(/--/g, '/');
+        return `
     <div class="image-row">
       <h3>${d.stem}</h3>
       <div class="original-path">public/images/${origPath}</div>
@@ -266,28 +392,29 @@ function renderImages(data) {
         </div>
       </div>
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function applyFilters() {
-  const filter = document.getElementById('filter').value;
-  const sort = document.getElementById('sort').value;
+    function applyFilters() {
+      const filter = document.getElementById('filter').value;
+      const sort = document.getElementById('sort').value;
 
-  let data = [...IMAGE_DATA];
-  if (filter !== 'all') data = data.filter(d => d.ext === filter);
+      let data = [...IMAGE_DATA];
+      if (filter !== 'all') data = data.filter(d => d.ext === filter);
 
-  if (sort === 'size-desc') data.sort((a, b) => b.originalSize - a.originalSize);
-  else if (sort === 'savings') data.sort((a, b) => (a.q60Size / a.originalSize) - (b.q60Size / b.originalSize));
-  else data.sort((a, b) => a.stem.localeCompare(b.stem));
+      if (sort === 'size-desc') data.sort((a, b) => b.originalSize - a.originalSize);
+      else if (sort === 'savings') data.sort((a, b) => (a.q60Size / a.originalSize) - (b.q60Size / b.originalSize));
+      else data.sort((a, b) => a.stem.localeCompare(b.stem));
 
-  renderSummary(data);
-  renderImages(data);
-}
+      renderSummary(data);
+      renderImages(data);
+    }
 
-document.getElementById('filter').addEventListener('change', applyFilters);
-document.getElementById('sort').addEventListener('change', applyFilters);
+    document.getElementById('filter').addEventListener('change', applyFilters);
+    document.getElementById('sort').addEventListener('change', applyFilters);
 
-applyFilters();
-</script>
+    applyFilters();
+  </script>
 </body>
+
 </html>
