@@ -15,6 +15,7 @@
   .summary th, .summary td { padding: 8px 16px; text-align: right; border: 1px solid #444; }
   .summary th { background: #222; text-align: left; }
   .summary .savings { color: #4caf50; }
+  .summary .section-header td { background: #1a1a1a; font-weight: bold; text-align: left; color: #ccc; }
 
   /* Image grid */
   .image-row { margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 20px; }
@@ -41,8 +42,32 @@
 <h1>Image Compression Comparison</h1>
 <p class="subtitle">earth.gov images over 1MB — compression testing for S3 re-upload</p>
 
+<!-- ==================== TOTAL SUMMARY ==================== -->
+
+<table class="summary" id="total-summary">
+  <thead>
+    <tr><th>Category</th><th>Count</th><th>Original</th><th>Compressed</th><th>Savings</th></tr>
+  </thead>
+  <tbody id="total-summary-body"></tbody>
+</table>
+
+<!-- ==================== ANIMATED GIFs → WebM ==================== -->
+
+<h2>Animated GIFs → WebM (VP9)</h2>
+<p class="subtitle">ffmpeg VP9 CRF 30 — animated WebP was tested but made files 2x larger, so WebM is the clear winner</p>
+
+<table class="summary" id="gif-summary-table">
+  <thead>
+    <tr><th>Variant</th><th>Total Size</th><th>Savings vs Original</th></tr>
+  </thead>
+  <tbody id="gif-summary-body"></tbody>
+</table>
+
+<div id="gif-images"></div>
+
 <!-- ==================== STATIC IMAGES (JPG/PNG → WebP) ==================== -->
 
+<div class="section-divider">
 <h2>Static Images: JPG/PNG → WebP</h2>
 <p class="subtitle">cwebp at q60 / q70 / q80 — click any image to open full size</p>
 
@@ -67,21 +92,6 @@
 </table>
 
 <div id="images"></div>
-
-<!-- ==================== ANIMATED GIFs → WebM ==================== -->
-
-<div class="section-divider">
-<h2>Animated GIFs → WebM (VP9)</h2>
-<p class="subtitle">ffmpeg VP9 CRF 30 — animated WebP was tested but made files 2x larger, so WebM is the clear winner</p>
-
-<table class="summary" id="gif-summary-table">
-  <thead>
-    <tr><th>Variant</th><th>Total Size</th><th>Savings vs Original</th></tr>
-  </thead>
-  <tbody id="gif-summary-body"></tbody>
-</table>
-
-<div id="gif-images"></div>
 </div>
 
 <script>
@@ -134,6 +144,69 @@ function formatBytes(bytes) {
 function pctSavings(orig, compressed) {
   return ((1 - compressed / orig) * 100).toFixed(1);
 }
+
+// ==================== Total summary ====================
+
+function renderTotalSummary() {
+  const tbody = document.getElementById('total-summary-body');
+
+  let gifOrig = 0, gifCompressed = 0;
+  GIF_DATA.forEach(d => { gifOrig += d.originalSize; gifCompressed += d.webmSize; });
+
+  let imgOrig = 0, imgQ60 = 0;
+  IMAGE_DATA.forEach(d => { imgOrig += d.originalSize; imgQ60 += d.q60Size; });
+
+  const totalOrig = gifOrig + imgOrig;
+  const totalCompressed = gifCompressed + imgQ60;
+
+  tbody.innerHTML = `
+    <tr><td>Animated GIFs → WebM</td><td>${GIF_DATA.length}</td><td>${formatBytes(gifOrig)}</td><td>${formatBytes(gifCompressed)}</td><td class="savings">${pctSavings(gifOrig, gifCompressed)}%</td></tr>
+    <tr><td>Static Images → WebP q60</td><td>${IMAGE_DATA.length}</td><td>${formatBytes(imgOrig)}</td><td>${formatBytes(imgQ60)}</td><td class="savings">${pctSavings(imgOrig, imgQ60)}%</td></tr>
+    <tr style="font-weight:bold; border-top: 2px solid #666;"><td>Total</td><td>${GIF_DATA.length + IMAGE_DATA.length}</td><td>${formatBytes(totalOrig)}</td><td>${formatBytes(totalCompressed)}</td><td class="savings">${pctSavings(totalOrig, totalCompressed)}%</td></tr>
+  `;
+}
+
+renderTotalSummary();
+
+// ==================== Animated GIFs ====================
+
+function renderGifSection() {
+  const tbody = document.getElementById('gif-summary-body');
+  let totalOrig = 0, totalWebm = 0;
+  GIF_DATA.forEach(d => { totalOrig += d.originalSize; totalWebm += d.webmSize; });
+
+  tbody.innerHTML = [
+    ['Original GIF', totalOrig, null],
+    ['WebM (VP9)', totalWebm, pctSavings(totalOrig, totalWebm)],
+  ].map(([name, size, s]) =>
+    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
+  ).join('');
+
+  const container = document.getElementById('gif-images');
+  container.innerHTML = GIF_DATA.map(d => {
+    const origPath = d.stem.replace(/--/g, '/');
+    return `
+    <div class="image-row">
+      <h3>${d.stem}</h3>
+      <div class="original-path">public/images/${origPath} (${d.frames} frames, ${d.duration})</div>
+      <div class="variants-2col">
+        <div class="variant">
+          <div class="label">Original GIF</div>
+          <a href="${d.originalFile}" target="_blank"><img src="${d.originalFile}" loading="lazy"></a>
+          <div class="size">${formatBytes(d.originalSize)}</div>
+        </div>
+        <div class="variant">
+          <div class="label">WebM (VP9 CRF 30)</div>
+          <video autoplay muted loop playsinline><source src="${d.webmFile}" type="video/webm"></video>
+          <div class="size">${formatBytes(d.webmSize)}</div>
+          <div class="savings">${pctSavings(d.originalSize, d.webmSize)}%</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderGifSection();
 
 // ==================== Static images ====================
 
@@ -215,48 +288,6 @@ document.getElementById('filter').addEventListener('change', applyFilters);
 document.getElementById('sort').addEventListener('change', applyFilters);
 
 applyFilters();
-
-// ==================== Animated GIFs ====================
-
-function renderGifSection() {
-  // Summary
-  const tbody = document.getElementById('gif-summary-body');
-  let totalOrig = 0, totalWebm = 0;
-  GIF_DATA.forEach(d => { totalOrig += d.originalSize; totalWebm += d.webmSize; });
-
-  tbody.innerHTML = [
-    ['Original GIF', totalOrig, null],
-    ['WebM (VP9)', totalWebm, pctSavings(totalOrig, totalWebm)],
-  ].map(([name, size, s]) =>
-    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
-  ).join('');
-
-  // Individual comparisons
-  const container = document.getElementById('gif-images');
-  container.innerHTML = GIF_DATA.map(d => {
-    const origPath = d.stem.replace(/--/g, '/');
-    return `
-    <div class="image-row">
-      <h3>${d.stem}</h3>
-      <div class="original-path">public/images/${origPath} (${d.frames} frames, ${d.duration})</div>
-      <div class="variants-2col">
-        <div class="variant">
-          <div class="label">Original GIF</div>
-          <a href="${d.originalFile}" target="_blank"><img src="${d.originalFile}" loading="lazy"></a>
-          <div class="size">${formatBytes(d.originalSize)}</div>
-        </div>
-        <div class="variant">
-          <div class="label">WebM (VP9 CRF 30)</div>
-          <video autoplay muted loop playsinline><source src="${d.webmFile}" type="video/webm"></video>
-          <div class="size">${formatBytes(d.webmSize)}</div>
-          <div class="savings">${pctSavings(d.originalSize, d.webmSize)}%</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-renderGifSection();
 </script>
 </body>
 </html>
