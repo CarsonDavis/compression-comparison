@@ -7,6 +7,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #111; color: #eee; padding: 20px; }
   h1 { margin-bottom: 8px; }
+  h2 { margin-top: 40px; margin-bottom: 8px; }
   .subtitle { color: #999; margin-bottom: 20px; }
 
   /* Summary table */
@@ -20,21 +21,30 @@
   .image-row h3 { margin-bottom: 4px; font-size: 14px; color: #aaa; }
   .image-row .original-path { font-size: 12px; color: #666; margin-bottom: 10px; }
   .variants { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .variants-2col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .variant { text-align: center; }
-  .variant img { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; border: 1px solid #333; background: #1a1a1a; cursor: pointer; }
+  .variant img, .variant video { max-width: 100%; height: auto; max-height: 300px; object-fit: contain; border: 1px solid #333; background: #1a1a1a; cursor: pointer; }
   .variant .label { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
   .variant .size { font-size: 12px; color: #999; }
   .variant .savings { font-size: 11px; color: #4caf50; }
 
   /* Filters */
   .controls { margin-bottom: 20px; display: flex; gap: 12px; align-items: center; }
-  .controls select, .controls input { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; }
+  .controls select { background: #222; color: #eee; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; }
+
+  /* Divider */
+  .section-divider { border-top: 2px solid #555; margin-top: 50px; padding-top: 20px; }
 </style>
 </head>
 <body>
 
 <h1>Image Compression Comparison</h1>
-<p class="subtitle">WebP conversion at q60 / q70 / q80 — click any image to open full size</p>
+<p class="subtitle">earth.gov images over 1MB — compression testing for S3 re-upload</p>
+
+<!-- ==================== STATIC IMAGES (JPG/PNG → WebP) ==================== -->
+
+<h2>Static Images: JPG/PNG → WebP</h2>
+<p class="subtitle">cwebp at q60 / q70 / q80 — click any image to open full size</p>
 
 <div class="controls">
   <label>Filter: <select id="filter">
@@ -58,8 +68,24 @@
 
 <div id="images"></div>
 
+<!-- ==================== ANIMATED GIFs → WebM ==================== -->
+
+<div class="section-divider">
+<h2>Animated GIFs → WebM (VP9)</h2>
+<p class="subtitle">ffmpeg VP9 CRF 30 — animated WebP was tested but made files 2x larger, so WebM is the clear winner</p>
+
+<table class="summary" id="gif-summary-table">
+  <thead>
+    <tr><th>Variant</th><th>Total Size</th><th>Savings vs Original</th></tr>
+  </thead>
+  <tbody id="gif-summary-body"></tbody>
+</table>
+
+<div id="gif-images"></div>
+</div>
+
 <script>
-// Image data will be injected by the build script
+// Static image data (JPG/PNG → WebP)
 const IMAGE_DATA = [
 {"stem":"portals--earth-information-center","ext":"png","originalPath":"portals--earth-information-center","originalFile":"originals/portals--earth-information-center.png","originalSize":1337368,"q60File":"webp-q60/portals--earth-information-center.webp","q60Size":197074,"q70File":"webp-q70/portals--earth-information-center.webp","q70Size":256352,"q80File":"webp-q80/portals--earth-information-center.webp","q80Size":401982},
 {"stem":"story--air-quality-and-covid-19--discovery-cover","ext":"jpg","originalPath":"story--air-quality-and-covid-19--discovery-cover","originalFile":"originals/story--air-quality-and-covid-19--discovery-cover.jpg","originalSize":1214952,"q60File":"webp-q60/story--air-quality-and-covid-19--discovery-cover.webp","q60Size":26368,"q70File":"webp-q70/story--air-quality-and-covid-19--discovery-cover.webp","q70Size":30638,"q80File":"webp-q80/story--air-quality-and-covid-19--discovery-cover.webp","q80Size":45016},
@@ -90,6 +116,15 @@ const IMAGE_DATA = [
 {"stem":"visit--nasa-hq--nasa-hq-gallery-5","ext":"jpg","originalPath":"visit--nasa-hq--nasa-hq-gallery-5","originalFile":"originals/visit--nasa-hq--nasa-hq-gallery-5.jpg","originalSize":1899067,"q60File":"webp-q60/visit--nasa-hq--nasa-hq-gallery-5.webp","q60Size":323150,"q70File":"webp-q70/visit--nasa-hq--nasa-hq-gallery-5.webp","q70Size":363460,"q80File":"webp-q80/visit--nasa-hq--nasa-hq-gallery-5.webp","q80Size":462992}
 ];
 
+// Animated GIF data (GIF → WebM)
+const GIF_DATA = [
+{"stem":"visit--frost-museum--EIC Immersive at BMOS - GIF 7","originalFile":"originals/visit--frost-museum--EIC Immersive at BMOS - GIF 7.gif","originalSize":5875270,"webmFile":"webm/visit--frost-museum--EIC Immersive at BMOS - GIF 7.webm","webmSize":772854,"frames":132,"duration":"6.6s"},
+{"stem":"visit--immersive-experience--untethered-1","originalFile":"originals/visit--immersive-experience--untethered-1.gif","originalSize":9178076,"webmFile":"webm/visit--immersive-experience--untethered-1.webm","webmSize":1671219,"frames":117,"duration":"5.9s"},
+{"stem":"visit--immersive-experience--untethered-2","originalFile":"originals/visit--immersive-experience--untethered-2.gif","originalSize":8482142,"webmFile":"webm/visit--immersive-experience--untethered-2.webm","webmSize":1123982,"frames":144,"duration":"7.2s"},
+{"stem":"visit--immersive-experience--untethered-3","originalFile":"originals/visit--immersive-experience--untethered-3.gif","originalSize":5438228,"webmFile":"webm/visit--immersive-experience--untethered-3.webm","webmSize":726497,"frames":91,"duration":"4.6s"},
+{"stem":"visit--immersive-experience--untethered-4","originalFile":"originals/visit--immersive-experience--untethered-4.gif","originalSize":5460499,"webmFile":"webm/visit--immersive-experience--untethered-4.webm","webmSize":856852,"frames":110,"duration":"5.5s"}
+];
+
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -99,6 +134,8 @@ function formatBytes(bytes) {
 function pctSavings(orig, compressed) {
   return ((1 - compressed / orig) * 100).toFixed(1);
 }
+
+// ==================== Static images ====================
 
 function renderSummary(data) {
   const tbody = document.getElementById('summary-body');
@@ -111,14 +148,14 @@ function renderSummary(data) {
   });
 
   const rows = [
-    ['Original', totals.original, '—'],
-    ['WebP q60', totals.q60, pctSavings(totals.original, totals.q60) + '%'],
-    ['WebP q70', totals.q70, pctSavings(totals.original, totals.q70) + '%'],
-    ['WebP q80', totals.q80, pctSavings(totals.original, totals.q80) + '%'],
+    ['Original', totals.original, null],
+    ['WebP q60', totals.q60, pctSavings(totals.original, totals.q60)],
+    ['WebP q70', totals.q70, pctSavings(totals.original, totals.q70)],
+    ['WebP q80', totals.q80, pctSavings(totals.original, totals.q80)],
   ];
 
-  tbody.innerHTML = rows.map(([name, size, savings]) =>
-    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${savings}</td></tr>`
+  tbody.innerHTML = rows.map(([name, size, s]) =>
+    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
   ).join('');
 }
 
@@ -127,7 +164,7 @@ function renderImages(data) {
   container.innerHTML = data.map(d => {
     const origPath = d.originalPath.replace(/--/g, '/');
     return `
-    <div class="image-row" data-ext="${d.ext}">
+    <div class="image-row">
       <h3>${d.stem}</h3>
       <div class="original-path">public/images/${origPath}</div>
       <div class="variants">
@@ -140,19 +177,19 @@ function renderImages(data) {
           <div class="label">WebP q60</div>
           <a href="${d.q60File}" target="_blank"><img src="${d.q60File}" loading="lazy"></a>
           <div class="size">${formatBytes(d.q60Size)}</div>
-          <div class="savings">-${pctSavings(d.originalSize, d.q60Size)}%</div>
+          <div class="savings">${pctSavings(d.originalSize, d.q60Size)}%</div>
         </div>
         <div class="variant">
           <div class="label">WebP q70</div>
           <a href="${d.q70File}" target="_blank"><img src="${d.q70File}" loading="lazy"></a>
           <div class="size">${formatBytes(d.q70Size)}</div>
-          <div class="savings">-${pctSavings(d.originalSize, d.q70Size)}%</div>
+          <div class="savings">${pctSavings(d.originalSize, d.q70Size)}%</div>
         </div>
         <div class="variant">
           <div class="label">WebP q80</div>
           <a href="${d.q80File}" target="_blank"><img src="${d.q80File}" loading="lazy"></a>
           <div class="size">${formatBytes(d.q80Size)}</div>
-          <div class="savings">-${pctSavings(d.originalSize, d.q80Size)}%</div>
+          <div class="savings">${pctSavings(d.originalSize, d.q80Size)}%</div>
         </div>
       </div>
     </div>`;
@@ -178,6 +215,48 @@ document.getElementById('filter').addEventListener('change', applyFilters);
 document.getElementById('sort').addEventListener('change', applyFilters);
 
 applyFilters();
+
+// ==================== Animated GIFs ====================
+
+function renderGifSection() {
+  // Summary
+  const tbody = document.getElementById('gif-summary-body');
+  let totalOrig = 0, totalWebm = 0;
+  GIF_DATA.forEach(d => { totalOrig += d.originalSize; totalWebm += d.webmSize; });
+
+  tbody.innerHTML = [
+    ['Original GIF', totalOrig, null],
+    ['WebM (VP9)', totalWebm, pctSavings(totalOrig, totalWebm)],
+  ].map(([name, size, s]) =>
+    `<tr><td>${name}</td><td>${formatBytes(size)}</td><td class="savings">${s ? s + '%' : '\u2014'}</td></tr>`
+  ).join('');
+
+  // Individual comparisons
+  const container = document.getElementById('gif-images');
+  container.innerHTML = GIF_DATA.map(d => {
+    const origPath = d.stem.replace(/--/g, '/');
+    return `
+    <div class="image-row">
+      <h3>${d.stem}</h3>
+      <div class="original-path">public/images/${origPath} (${d.frames} frames, ${d.duration})</div>
+      <div class="variants-2col">
+        <div class="variant">
+          <div class="label">Original GIF</div>
+          <a href="${d.originalFile}" target="_blank"><img src="${d.originalFile}" loading="lazy"></a>
+          <div class="size">${formatBytes(d.originalSize)}</div>
+        </div>
+        <div class="variant">
+          <div class="label">WebM (VP9 CRF 30)</div>
+          <video autoplay muted loop playsinline><source src="${d.webmFile}" type="video/webm"></video>
+          <div class="size">${formatBytes(d.webmSize)}</div>
+          <div class="savings">${pctSavings(d.originalSize, d.webmSize)}%</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderGifSection();
 </script>
 </body>
 </html>
